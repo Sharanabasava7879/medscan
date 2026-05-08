@@ -1,21 +1,22 @@
-const { getStore } = require('@netlify/blobs');
+const { getData, setData } = require('./db');
 
 exports.handler = async (event) => {
   const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
-  const store = getStore('medscan');
-
-  if (event.httpMethod === 'POST') {
-    const log = JSON.parse(event.body);
-    const deviceId = log.deviceId || 'MED001';
-    const logs = await store.get(`logs-${deviceId}`, { type: 'json' }).catch(() => []) || [];
-    logs.unshift(log);
-    await store.setJSON(`logs-${deviceId}`, logs.slice(0, 100));
-    return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+  try {
+    if (event.httpMethod === 'POST') {
+      const log = JSON.parse(event.body);
+      const deviceId = log.deviceId || 'MED001';
+      const logs = await getData(`logs-${deviceId}`) || [];
+      logs.unshift(log);
+      await setData(`logs-${deviceId}`, logs.slice(0, 100));
+      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+    }
+    const deviceId = event.queryStringParameters?.deviceId || 'MED001';
+    const logs = await getData(`logs-${deviceId}`) || [];
+    return { statusCode: 200, headers, body: JSON.stringify({ logs }) };
+  } catch (e) {
+    return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
   }
-
-  const deviceId = event.queryStringParameters?.deviceId || 'MED001';
-  const logs = await store.get(`logs-${deviceId}`, { type: 'json' }).catch(() => []) || [];
-  return { statusCode: 200, headers, body: JSON.stringify({ logs }) };
 };
