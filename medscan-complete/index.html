@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDSCAN - Patient Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #10b981, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+        
+        .success-msg {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .success-msg h3 {
+            color: #10b981;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .device-id {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 20px;
+            color: #38bdf8;
+            margin-top: 15px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .hidden { display: none; }
+        
+        .nav-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #38bdf8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .nav-link:hover { color: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏥 MEDSCAN</div>
+            <p class="subtitle">IoT Medication Management System</p>
+        </div>
+        
+        <div id="registrationForm">
+            <h2 style="color: #10b981; margin-bottom: 20px; text-align: center;">Patient Registration</h2>
+            
+            <form id="patientForm">
+                <div class="form-group">
+                    <label>👤 Patient Name</label>
+                    <input type="text" id="patientName" placeholder="Enter full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🎂 Age</label>
+                    <input type="number" id="age" placeholder="Enter age" min="1" max="120" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>⚧ Gender</label>
+                    <select id="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📞 Contact Number</label>
+                    <input type="tel" id="phone" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📧 Email (Optional)</label>
+                    <input type="email" id="email" placeholder="patient@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>🏠 Address</label>
+                    <input type="text" id="address" placeholder="Full address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>🆔 Device ID</label>
+                    <input type="text" id="deviceId" placeholder="Device serial number (e.g., MED001)" required>
+                </div>
+                
+                <button type="submit" class="btn">Register Patient</button>
+            </form>
+        </div>
+        
+        <div id="successScreen" class="hidden">
+            <div class="success-msg">
+                <h3>✅ Patient Registered Successfully!</h3>
+                <p style="color: #cbd5e1; margin-top: 10px;">Device is now ready for medication setup</p>
+                <div class="device-id" id="registeredDevice"></div>
+            </div>
+            
+            <a href="setup.html" class="nav-link">→ Setup Medications</a> |
+            <a href="dashboard.html" class="nav-link">→ View Dashboard</a>
+        </div>
+    </div>
+    
+    <script>
+        const API = '/.netlify/functions';
+        
+        document.getElementById('patientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const patient = {
+                name: document.getElementById('patientName').value,
+                age: parseInt(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                deviceId: document.getElementById('deviceId').value.toUpperCase(),
+                registeredAt: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(`${API}/register-patient`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(patient)
+                });
+                
+                if (response.ok) {
+                    document.getElementById('registeredDevice').textContent = patient.deviceId;
+                    document.getElementById('registrationForm').classList.add('hidden');
+                    document.getElementById('successScreen').classList.remove('hidden');
+                    
+                    // Store device ID for next steps
+                    localStorage.setItem('currentDevice', patient.deviceId);
+                } else {
+                    alert('Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection.');
+            }
+        });
+    </script>
+</body>
+</html>

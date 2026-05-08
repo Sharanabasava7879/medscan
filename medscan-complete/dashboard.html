@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDSCAN - Patient Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #10b981, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .nav {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .nav a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.9);
+            color: #38bdf8;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+        
+        .nav a:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .card h3 {
+            color: #10b981;
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card h3::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: #10b981;
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+        
+        .patient-info {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .patient-info p {
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+        
+        .patient-info strong {
+            color: #10b981;
+            min-width: 120px;
+            display: inline-block;
+        }
+        
+        .med-item {
+            background: #0f172a;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .med-item h4 {
+            color: #e2e8f0;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .med-item p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .log-entry {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border-left: 4px solid #38bdf8;
+        }
+        
+        .log-entry .timestamp {
+            color: #38bdf8;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .log-entry .details {
+            color: #e2e8f0;
+            font-size: 15px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #64748b;
+            padding: 40px 20px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📊 PATIENT DASHBOARD</div>
+            <p style="color: #94a3b8; font-size: 16px;">Monitor medications and track intake history</p>
+        </div>
+        
+        <div class="nav">
+            <a href="index.html">← Back to Registration</a>
+            <a href="setup.html">Setup Medications</a>
+        </div>
+        
+        <div class="grid">
+            <!-- Patient Info Card -->
+            <div class="card">
+                <h3>👤 Patient Information</h3>
+                <div id="patientInfo" class="patient-info">Loading...</div>
+            </div>
+            
+            <!-- Registered Medications Card -->
+            <div class="card">
+                <h3>💊 Registered Medications</h3>
+                <div id="medicationList">Loading...</div>
+            </div>
+            
+            <!-- Recent Intake Log Card -->
+            <div class="card" style="grid-column: span 2;">
+                <h3>📋 Recent Medication Intake</h3>
+                <div id="intakeLog">Loading...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API = '/.netlify/functions';
+        const deviceId = localStorage.getItem('currentDevice') || 'MED001';
+        
+        async function loadDashboard() {
+            // Load patient info
+            try {
+                const patResponse = await fetch(`${API}/get-patient?deviceId=${deviceId}`);
+                const patData = await patResponse.json();
+                
+                if (patData.patient) {
+                    const p = patData.patient;
+                    document.getElementById('patientInfo').innerHTML = `
+                        <p><strong>Name:</strong> ${p.name}</p>
+                        <p><strong>Age:</strong> ${p.age} years | <strong>Gender:</strong> ${p.gender}</p>
+                        <p><strong>Phone:</strong> ${p.phone}</p>
+                        <p><strong>Device ID:</strong> ${p.deviceId}</p>
+                        <p><strong>Registered:</strong> ${new Date(p.registeredAt).toLocaleDateString()}</p>
+                    `;
+                } else {
+                    document.getElementById('patientInfo').innerHTML = '<div class="empty-state">No patient registered</div>';
+                }
+            } catch (error) {
+                console.error('Error loading patient:', error);
+            }
+            
+            // Load medications
+            try {
+                const medResponse = await fetch(`${API}/get-medications?deviceId=${deviceId}`);
+                const medData = await medResponse.json();
+                
+                const medList = document.getElementById('medicationList');
+                if (medData.medications && medData.medications.length > 0) {
+                    medList.innerHTML = medData.medications.map(med => `
+                        <div class="med-item">
+                            <h4>${med.name}</h4>
+                            <p>📝 ${med.instructions}</p>
+                            <p>📦 Compartment ${med.compartment} | ⏰ ${med.hour.toString().padStart(2, '0')}:${med.minute.toString().padStart(2, '0')}</p>
+                            <p>🔖 RFID: ${med.rfid}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    medList.innerHTML = '<div class="empty-state">No medications registered yet</div>';
+                }
+            } catch (error) {
+                console.error('Error loading medications:', error);
+            }
+            
+            // Load intake logs
+            try {
+                const logResponse = await fetch(`${API}/log-intake?deviceId=${deviceId}`);
+                const logData = await logResponse.json();
+                
+                const logList = document.getElementById('intakeLog');
+                if (logData.logs && logData.logs.length > 0) {
+                    logList.innerHTML = logData.logs.slice(0, 15).map(log => `
+                        <div class="log-entry">
+                            <div class="timestamp">${new Date(log.timestamp).toLocaleString()}</div>
+                            <div class="details"><strong>${log.medication}</strong> taken from Compartment ${log.compartment}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    logList.innerHTML = '<div class="empty-state">No intake recorded yet</div>';
+                }
+            } catch (error) {
+                console.error('Error loading logs:', error);
+            }
+        }
+        
+        loadDashboard();
+        setInterval(loadDashboard, 10000); // Refresh every 10 seconds
+    </script>
+</body>
+</html>

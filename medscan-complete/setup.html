@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDSCAN - Medication Setup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 42px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #10b981, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+        
+        .status-box h3 {
+            font-size: 20px;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+        
+        .status-box.success h3 {
+            color: #10b981;
+        }
+        
+        .rfid-display {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            padding: 18px;
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            color: #38bdf8;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            color: #e2e8f0;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid #38bdf8;
+            color: #38bdf8;
+            margin-top: 15px;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+        
+        .hidden { display: none; }
+        
+        .med-details {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .med-details p {
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: #cbd5e1;
+        }
+        
+        .med-details strong {
+            color: #10b981;
+            min-width: 150px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">💊 MEDICATION SETUP</div>
+            <p style="color: #94a3b8; margin-top: 10px;">Scan tablet RFID tag to begin</p>
+        </div>
+        
+        <!-- Waiting for Scan -->
+        <div id="waitingScreen" class="card">
+            <div class="status-box">
+                <h3>⏳ Waiting for RFID Scan</h3>
+                <p style="color: #cbd5e1; font-size: 14px;">Press SET button on device and scan tablet RFID tag</p>
+            </div>
+            <div class="rfid-display" id="scannedUID">NO TAG DETECTED</div>
+        </div>
+        
+        <!-- Medication Registration Form -->
+        <div id="setupForm" class="card hidden">
+            <div class="status-box success">
+                <h3>✅ RFID Tag Detected</h3>
+                <p style="color: #cbd5e1; font-size: 14px;">Complete medication details below</p>
+            </div>
+            <div class="rfid-display" id="formUID"></div>
+            
+            <form id="medForm" style="margin-top: 30px;">
+                <div class="form-group">
+                    <label>💊 Tablet/Medicine Name</label>
+                    <input type="text" id="medName" placeholder="e.g., Aspirin 100mg" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Dosage & Instructions</label>
+                    <textarea id="instructions" rows="2" placeholder="e.g., 1 tablet after breakfast with water" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>📦 Compartment Number (1-6)</label>
+                    <select id="compartment" required>
+                        <option value="">Select compartment...</option>
+                        <option value="1">Compartment 1</option>
+                        <option value="2">Compartment 2</option>
+                        <option value="3">Compartment 3</option>
+                        <option value="4">Compartment 4</option>
+                        <option value="5">Compartment 5</option>
+                        <option value="6">Compartment 6</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>⏰ Reminder Time (24-hour format)</label>
+                    <div class="time-grid">
+                        <input type="number" id="hour" placeholder="Hour (0-23)" min="0" max="23" required>
+                        <input type="number" id="minute" placeholder="Minute (0-59)" min="0" max="59" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>🔁 Frequency</label>
+                    <select id="frequency" required>
+                        <option value="daily">Daily</option>
+                        <option value="twice-daily">Twice Daily</option>
+                        <option value="three-times">Three Times Daily</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">Save Medication</button>
+            </form>
+        </div>
+        
+        <!-- Success Screen -->
+        <div id="successScreen" class="card hidden">
+            <div class="status-box success">
+                <h3>✅ Tablet Registered Successfully!</h3>
+                <p style="color: #cbd5e1; font-size: 14px;">Configuration sent to device</p>
+            </div>
+            
+            <div class="med-details" id="medDetails"></div>
+            
+            <button class="btn btn-secondary" onclick="resetForm()">Register Another Tablet</button>
+            <a href="dashboard.html"><button class="btn" style="margin-top: 10px;">Go to Dashboard</button></a>
+        </div>
+    </div>
+    
+    <script>
+        const API = '/.netlify/functions';
+        let currentRFID = '';
+        let deviceId = localStorage.getItem('currentDevice') || 'MED001';
+        
+        // Poll for RFID scans
+        setInterval(async () => {
+            try {
+                const response = await fetch(`${API}/register-scan`);
+                const data = await response.json();
+                
+                if (data.rfid && data.rfid !== currentRFID) {
+                    handleRFIDScan(data.rfid);
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 2000);
+        
+        function handleRFIDScan(uid) {
+            currentRFID = uid;
+            document.getElementById('scannedUID').textContent = uid;
+            document.getElementById('formUID').textContent = uid;
+            document.getElementById('waitingScreen').classList.add('hidden');
+            document.getElementById('setupForm').classList.remove('hidden');
+        }
+        
+        document.getElementById('medForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const medication = {
+                deviceId: deviceId,
+                rfid: currentRFID,
+                name: document.getElementById('medName').value,
+                instructions: document.getElementById('instructions').value,
+                compartment: parseInt(document.getElementById('compartment').value),
+                hour: parseInt(document.getElementById('hour').value),
+                minute: parseInt(document.getElementById('minute').value),
+                frequency: document.getElementById('frequency').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch(`${API}/save-medication`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(medication)
+                });
+                
+                if (response.ok) {
+                    showSuccess(medication);
+                } else {
+                    alert('Error saving medication. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error. Please check your connection.');
+            }
+        });
+        
+        function showSuccess(med) {
+            const timeStr = `${med.hour.toString().padStart(2, '0')}:${med.minute.toString().padStart(2, '0')}`;
+            
+            document.getElementById('medDetails').innerHTML = `
+                <p><strong>Medication:</strong> ${med.name}</p>
+                <p><strong>Instructions:</strong> ${med.instructions}</p>
+                <p><strong>Compartment:</strong> ${med.compartment}</p>
+                <p><strong>Reminder Time:</strong> ${timeStr}</p>
+                <p><strong>Frequency:</strong> ${med.frequency}</p>
+                <p><strong>RFID Tag:</strong> ${med.rfid}</p>
+            `;
+            
+            document.getElementById('setupForm').classList.add('hidden');
+            document.getElementById('successScreen').classList.remove('hidden');
+        }
+        
+        function resetForm() {
+            document.getElementById('medForm').reset();
+            document.getElementById('successScreen').classList.add('hidden');
+            document.getElementById('waitingScreen').classList.remove('hidden');
+            currentRFID = '';
+        }
+    </script>
+</body>
+</html>
